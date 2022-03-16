@@ -1,47 +1,88 @@
-import WzApiFactory from 'call-of-duty-api';
-import { isWithinInterval } from 'date-fns';
+import { login, platforms, Warzone } from "call-of-duty-api";
+import { Interval } from "date-fns";
 
-export const API = WzApiFactory();
+interface Player {
+  gamertag: string;
+  platform: platforms;
+}
 
-const CREDENTIALS = {
-  username: process.env.WZ_USERNAME,
-  password: process.env.WZ_PASSWORD,
-};
-const CAREER = { kills: undefined, wins: undefined, kdRatio: undefined };
-const PLAYER_HIGHLIGHTS = { gamertag: undefined, mostKills: undefined, highestKD: undefined };
+const COD_USERNAME = process.env.COD_USERNAME;
+const COD_PASSWORD = process.env.COD_PASSWORD;
+const credentials = { username: COD_USERNAME, password: COD_PASSWORD };
+console.log(`Credentials used: ${credentials.username.slice(0, 8)} / ${new Array(credentials.password.length).fill('*').join('')}`);
 
 export const loginToCOD = async () => {
+  const loggedIn = login(process.env.SSO_TOKEN);
+  return loggedIn;
+};
+
+/**
+ * Getter function that fetches important player KPIs
+ * @param {Player} player 
+ * @returns 
+ */
+export const getCareer = async (player: Player) => {
+  const loggedIn = await loginToCOD();
+  if (!loggedIn) {
+    return {};
+  }
+
+  const { gamertag, platform } = player;
+  const { data: careerData } = await Warzone.fullData(gamertag, platform);
+
+  const stats = careerData.lifetime.mode.br.properties;
+  const { kills, wins, kdRatio, deaths } = stats;
+
+  return { kills, wins, kdRatio, deaths };
+};
+
+/**
+ * Thin wrapper around base API's combat history, fetches last 20 matches
+ * along with player summary.
+ * @param {Player} player 
+ * @returns 
+ */
+export const getStats = async (player: Player) => {
+  const loggedIn = await loginToCOD();
+  if (!loggedIn) {
+    return {};
+  }
+
   try {
-    if (CREDENTIALS.username && CREDENTIALS.password) {
-      await API.login(CREDENTIALS.username, CREDENTIALS.password);
-      return true;
-    }
-    return false;
+    const { gamertag, platform } = player;
+    const { data: combatData } = await Warzone.combatHistory(gamertag, platform);
+
+    return combatData;
   } catch (error) {
-    return false;
+    console.warn(error);
+    return {};
   }
 };
 
-function getMatchEndTime(match) {
-  return new Date(match.utcEndSeconds * 1000);
-}
-
-function findMatchesInInterval(matches, interval) {
-  if (interval) {
-    return matches.filter((match) => isWithinInterval(getMatchEndTime(match), interval));
+/**
+ * Get match stats from `player`; delimited by an optional `interval paramater.
+ * @param {Player} player 
+ * @param {Interval} interval 
+ * @returns 
+ */
+export const getHighlights = async (player: Player, interval: Interval) => {
+  const loggedIn = await loginToCOD();
+  if (!loggedIn) {
+    return {};
   }
-  return matches;
-}
-
-const fetchPlayerHighlights = async (player, interval) => {
+  
   try {
     const { gamertag, platform } = player;
-    const { matches } = await API.MWcombatwz(gamertag, platform);
-    const matchesWithinInterval = findMatchesInInterval(matches, interval);
+    const { data: combatData } = await Warzone.combatHistoryWithDate(
+      gamertag,
+      interval.start as number,
+      interval.end as number,
+      platform
+    );
 
-    const highlights = matchesWithinInterval.reduce(
-      (result, match) => {
-        const { mostKills, highestKD } = result;
+    const { mostKills, highestKD } = combatData.matches.reduce(
+      (acc, match) => {
+        const { mostKills, highestKD } = acc;
         const { kills, kdRatio } = match.playerStats;
 
         return {
@@ -49,43 +90,11 @@ const fetchPlayerHighlights = async (player, interval) => {
           highestKD: !highestKD || highestKD < kdRatio ? kdRatio : highestKD,
         };
       },
-      { ...PLAYER_HIGHLIGHTS },
+      {}
     );
-    return { gamertag, ...highlights };
+    return { gamertag, mostKills, highestKD };
   } catch (error) {
-    return PLAYER_HIGHLIGHTS;
-  }
-};
-
-/**
- * Get career stats from `player`.
- */
-export const getCareer = async (player: { gamertag: string; platform: string; }) => {
-  const loggedIn = await loginToCOD();
-  if (!loggedIn) {
-    return CAREER;
-  }
-
-  const { gamertag, platform } = player;
-  const career = await API.MWBattleData(gamertag, platform);
-  const { kills, wins, kdRatio } = career.br;
-
-  return { kills, wins, kdRatio };
-};
-
-/**
- * Get match stats from `player`; delimited by an optional `interval` parameter.
- */
-export const getPlayerHighlights = async (player, interval) => {
-  const loggedIn = await loginToCOD();
-  if (!loggedIn) {
-    return PLAYER_HIGHLIGHTS;
-  }
-
-  // Fail gracefully if a player's stats can't be fetched / aggregated
-  try {
-    return await fetchPlayerHighlights(player, interval);
-  } catch (error) {
-    return PLAYER_HIGHLIGHTS;
+    console.warn(error);
+    return {};
   }
 };
