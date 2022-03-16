@@ -3,9 +3,10 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { getCareer } from '../../core';
 
 type CareerData = {
-  kills: number,
-  wins: number,
-  kdRatio: number
+  kills?: number,
+  wins?: number,
+  kdRatio?: number,
+  deaths?: number,
 };
 
 export default async (req: NextApiRequest, res: NextApiResponse<CareerData>) => {
