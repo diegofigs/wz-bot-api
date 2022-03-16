@@ -4,17 +4,6 @@ import { Interval } from 'date-fns';
 import { Player } from './interfaces';
 import { CareerResponse, HighlightsResponse } from './types';
 
-const { COD_USERNAME } = process.env;
-const { COD_PASSWORD } = process.env;
-const credentials = { username: COD_USERNAME, password: COD_PASSWORD };
-console.log(
-  `Credentials used: ${credentials.username.slice(0, 8)} / ${new Array(
-    credentials.password.length,
-  )
-    .fill('*')
-    .join('')}`,
-);
-
 export const loginToCOD = async () => {
   const loggedIn = login(process.env.SSO_TOKEN);
   return loggedIn;
