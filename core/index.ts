@@ -1,15 +1,19 @@
-import { login, platforms, Warzone } from "call-of-duty-api";
+import { login, Warzone } from "call-of-duty-api";
 import { Interval } from "date-fns";
 
-interface Player {
-  gamertag: string;
-  platform: platforms;
-}
+import { Player } from "./interfaces";
+import { CareerResponse, HighlightsResponse } from "./types";
 
 const COD_USERNAME = process.env.COD_USERNAME;
 const COD_PASSWORD = process.env.COD_PASSWORD;
 const credentials = { username: COD_USERNAME, password: COD_PASSWORD };
-console.log(`Credentials used: ${credentials.username.slice(0, 8)} / ${new Array(credentials.password.length).fill('*').join('')}`);
+console.log(
+  `Credentials used: ${credentials.username.slice(0, 8)} / ${new Array(
+    credentials.password.length
+  )
+    .fill("*")
+    .join("")}`
+);
 
 export const loginToCOD = async () => {
   const loggedIn = login(process.env.SSO_TOKEN);
@@ -18,10 +22,10 @@ export const loginToCOD = async () => {
 
 /**
  * Getter function that fetches important player KPIs
- * @param {Player} player 
- * @returns 
+ * @param {Player} player
+ * @returns
  */
-export const getCareer = async (player: Player) => {
+export const getCareer = async (player: Player): Promise<CareerResponse> => {
   const loggedIn = await loginToCOD();
   if (!loggedIn) {
     return {};
@@ -39,8 +43,8 @@ export const getCareer = async (player: Player) => {
 /**
  * Thin wrapper around base API's combat history, fetches last 20 matches
  * along with player summary.
- * @param {Player} player 
- * @returns 
+ * @param {Player} player
+ * @returns
  */
 export const getStats = async (player: Player) => {
   const loggedIn = await loginToCOD();
@@ -50,7 +54,10 @@ export const getStats = async (player: Player) => {
 
   try {
     const { gamertag, platform } = player;
-    const { data: combatData } = await Warzone.combatHistory(gamertag, platform);
+    const { data: combatData } = await Warzone.combatHistory(
+      gamertag,
+      platform
+    );
 
     return combatData;
   } catch (error) {
@@ -61,16 +68,19 @@ export const getStats = async (player: Player) => {
 
 /**
  * Get match stats from `player`; delimited by an optional `interval paramater.
- * @param {Player} player 
- * @param {Interval} interval 
- * @returns 
+ * @param {Player} player
+ * @param {Interval} interval
+ * @returns
  */
-export const getHighlights = async (player: Player, interval: Interval) => {
+export const getHighlights = async (
+  player: Player,
+  interval: Interval
+): Promise<HighlightsResponse> => {
   const loggedIn = await loginToCOD();
   if (!loggedIn) {
     return {};
   }
-  
+
   try {
     const { gamertag, platform } = player;
     const { data: combatData } = await Warzone.combatHistoryWithDate(
@@ -80,19 +90,16 @@ export const getHighlights = async (player: Player, interval: Interval) => {
       platform
     );
 
-    const { mostKills, highestKD } = combatData.matches.reduce(
-      (acc, match) => {
-        const { mostKills, highestKD } = acc;
-        const { kills, kdRatio } = match.playerStats;
+    const { mostKills, highestKD } = combatData.matches.reduce((acc, match) => {
+      const { mostKills, highestKD } = acc;
+      const { kills, kdRatio } = match.playerStats;
 
-        return {
-          mostKills: !mostKills || mostKills < kills ? kills : mostKills,
-          highestKD: !highestKD || highestKD < kdRatio ? kdRatio : highestKD,
-        };
-      },
-      {}
-    );
-    return { gamertag, mostKills, highestKD };
+      return {
+        mostKills: !mostKills || mostKills < kills ? kills : mostKills,
+        highestKD: !highestKD || highestKD < kdRatio ? kdRatio : highestKD,
+      };
+    }, {});
+    return { mostKills, highestKD };
   } catch (error) {
     console.warn(error);
     return {};
