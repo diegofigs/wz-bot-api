@@ -1,15 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { startOfDay } from 'date-fns';
 
-import { getHighlights } from '../../core';
+import { getHighlights } from 'core';
+import { HighlightsResponse } from 'core/types';
 
-type HighlightsData = {
-  gamertag?: string,
-  mostKills?: number,
-  highestKD?: number
-};
-
-export default async (req: NextApiRequest, res: NextApiResponse<HighlightsData>) => {
+export default async (req: NextApiRequest, res: NextApiResponse<HighlightsResponse>) => {
   const { gamertag, platform } = req.body;
 
   const now = new Date();
