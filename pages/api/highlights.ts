@@ -4,7 +4,7 @@ import { startOfDay } from 'date-fns';
 import { getHighlights } from 'core';
 import { HighlightsResponse } from 'core/types';
 
-export default async (req: NextApiRequest, res: NextApiResponse<HighlightsResponse>) => {
+const getHighlightsHandler = async (req: NextApiRequest, res: NextApiResponse<HighlightsResponse>) => {
   const { gamertag, platform } = req.body;
 
   const now = new Date();
@@ -13,3 +13,5 @@ export default async (req: NextApiRequest, res: NextApiResponse<HighlightsRespon
 
   res.send(highlights);
 };
+
+export default getHighlightsHandler;

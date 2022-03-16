@@ -1,18 +1,18 @@
-import { login, Warzone } from "call-of-duty-api";
-import { Interval } from "date-fns";
+import { login, Warzone } from 'call-of-duty-api';
+import { Interval } from 'date-fns';
 
-import { Player } from "./interfaces";
-import { CareerResponse, HighlightsResponse } from "./types";
+import { Player } from './interfaces';
+import { CareerResponse, HighlightsResponse } from './types';
 
-const COD_USERNAME = process.env.COD_USERNAME;
-const COD_PASSWORD = process.env.COD_PASSWORD;
+const { COD_USERNAME } = process.env;
+const { COD_PASSWORD } = process.env;
 const credentials = { username: COD_USERNAME, password: COD_PASSWORD };
 console.log(
   `Credentials used: ${credentials.username.slice(0, 8)} / ${new Array(
-    credentials.password.length
+    credentials.password.length,
   )
-    .fill("*")
-    .join("")}`
+    .fill('*')
+    .join('')}`,
 );
 
 export const loginToCOD = async () => {
@@ -35,9 +35,13 @@ export const getCareer = async (player: Player): Promise<CareerResponse> => {
   const { data: careerData } = await Warzone.fullData(gamertag, platform);
 
   const stats = careerData.lifetime.mode.br.properties;
-  const { kills, wins, kdRatio, deaths } = stats;
+  const {
+    kills, wins, kdRatio, deaths,
+  } = stats;
 
-  return { kills, wins, kdRatio, deaths };
+  return {
+    kills, wins, kdRatio, deaths,
+  };
 };
 
 /**
@@ -56,12 +60,11 @@ export const getStats = async (player: Player) => {
     const { gamertag, platform } = player;
     const { data: combatData } = await Warzone.combatHistory(
       gamertag,
-      platform
+      platform,
     );
 
     return combatData;
   } catch (error) {
-    console.warn(error);
     return {};
   }
 };
@@ -74,7 +77,7 @@ export const getStats = async (player: Player) => {
  */
 export const getHighlights = async (
   player: Player,
-  interval: Interval
+  interval: Interval,
 ): Promise<HighlightsResponse> => {
   const loggedIn = await loginToCOD();
   if (!loggedIn) {
@@ -87,10 +90,10 @@ export const getHighlights = async (
       gamertag,
       interval.start as number,
       interval.end as number,
-      platform
+      platform,
     );
 
-    const { mostKills, highestKD } = combatData.matches.reduce((acc, match) => {
+    const result = combatData.matches.reduce((acc, match) => {
       const { mostKills, highestKD } = acc;
       const { kills, kdRatio } = match.playerStats;
 
@@ -99,9 +102,8 @@ export const getHighlights = async (
         highestKD: !highestKD || highestKD < kdRatio ? kdRatio : highestKD,
       };
     }, {});
-    return { mostKills, highestKD };
+    return { mostKills: result.mostKills, highestKD: result.highestKD };
   } catch (error) {
-    console.warn(error);
     return {};
   }
 };
