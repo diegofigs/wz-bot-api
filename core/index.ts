@@ -82,7 +82,7 @@ export const getHighlights = async (
       platform,
     );
 
-    const result = combatData.matches.reduce((acc, match) => {
+    const response = combatData.matches.reduce((acc, match) => {
       const { mostKills, highestKD } = acc;
       const { kills, kdRatio } = match.playerStats;
 
@@ -90,8 +90,34 @@ export const getHighlights = async (
         mostKills: !mostKills || mostKills < kills ? kills : mostKills,
         highestKD: !highestKD || highestKD < kdRatio ? kdRatio : highestKD,
       };
-    }, {});
-    return { mostKills: result.mostKills, highestKD: result.highestKD };
+    }, {}) as HighlightsResponse;
+    return response;
+  } catch (error) {
+    return {};
+  }
+};
+
+export const getRebirth = async (player: Player) => {
+  const loggedIn = await loginToCOD();
+  if (!loggedIn) {
+    return {};
+  }
+
+  try {
+    const { gamertag, platform } = player;
+    const { data: combatData } = await Warzone.combatHistory(gamertag, platform);
+
+    const rebirthMatches = combatData.matches.filter(match => match.mode.includes("br_rebirth"));
+    const response = rebirthMatches.reduce((acc, match) => {
+      const { mostKills, highestKD } = acc;
+      const { kills, kdRatio } = match.playerStats;
+
+      return {
+        mostKills: !mostKills || mostKills < kills ? kills : mostKills,
+        highestKD: !highestKD || highestKD < kdRatio ? kdRatio : highestKD,
+      };
+    }, {}) as HighlightsResponse;
+    return response;
   } catch (error) {
     return {};
   }
