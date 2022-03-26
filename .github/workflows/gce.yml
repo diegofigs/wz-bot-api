@@ -49,5 +49,5 @@ jobs:
           --project $CLOUD_RUN_PROJECT_ID \
           --region $CLOUD_RUN_REGION \
           --port 3000 \
-          --set-secrets=[SSO_TOKEN=$SSO_TOKEN] \
+          --set-env-vars=[SSO_TOKEN=$SSO_TOKEN] \
           --quiet
