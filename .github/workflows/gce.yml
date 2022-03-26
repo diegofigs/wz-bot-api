@@ -1,9 +1,11 @@
 name: Deploy to Google Cloud Run
 
 on:
-  push:
+  workflow_run:
+    workflows: [Docker Build/Push]
+    types:
+      - completed
     branches:
-      - master
       - main
 
 env:
@@ -13,13 +15,19 @@ env:
   SSO_TOKEN: ${{ secrets.SSO_TOKEN }}
 
 jobs:
-  build-and-deploy:
-    name: Setup, Build, and Deploy
+  deploy:
+    name: Deploy
     runs-on: ubuntu-latest
-    steps:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
+    permissions:
+      contents: 'read'
+      packages: 'write'
+      id-token: 'write'
+
+    steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     # This step is where our service account will be authenticated
     - id: 'auth'
@@ -31,20 +39,14 @@ jobs:
     - name: Set up Cloud SDK
       uses: google-github-actions/setup-gcloud@v0
 
+    # Configure Docker to use the gcloud command-line tool as a credential
+    # helper for authentication
     - run: |-
         gcloud --quiet auth configure-docker
 
-    - name: Build and tag image
-      run: |-
-        docker build . --tag "gcr.io/$CLOUD_RUN_PROJECT_ID/$REPO_NAME:$GITHUB_SHA"
-
-    - name: Push image to GCR
-      run: |-
-        docker push gcr.io/$CLOUD_RUN_PROJECT_ID/$REPO_NAME:$GITHUB_SHA
-
     - name: Deploy
       run: |-
-        gcloud run deploy $REPO_NAME --image gcr.io/$CLOUD_RUN_PROJECT_ID/$REPO_NAME:$GITHUB_SHA \
+        gcloud run deploy $REPO_NAME --image "ghcr.io/diegofigs/$REPO_NAME:main" \
           --project $CLOUD_RUN_PROJECT_ID \
           --region $CLOUD_RUN_REGION \
           --set-env-vars SSO_TOKEN=$SSO_TOKEN \
