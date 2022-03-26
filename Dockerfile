@@ -32,6 +32,7 @@ ARG PORT=3000
 ENV APP_ENV=${APP_ENV} \
     NODE_ENV=${NODE_ENV} \
     PORT=${PORT}
+ENV PATH=/app/node_modules/.bin:$PATH
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
