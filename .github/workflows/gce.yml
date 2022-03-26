@@ -44,9 +44,17 @@ jobs:
     - run: |-
         gcloud --quiet auth configure-docker
 
+    - name: Build and tag image
+      run: |-
+        docker build . --tag "gcr.io/$CLOUD_RUN_PROJECT_ID/$REPO_NAME:$GITHUB_SHA"
+
+    - name: Push image to GCR
+      run: |-
+        docker push gcr.io/$CLOUD_RUN_PROJECT_ID/$REPO_NAME:$GITHUB_SHA
+
     - name: Deploy
       run: |-
-        gcloud run deploy $REPO_NAME --image "ghcr.io/diegofigs/$REPO_NAME:main" \
+        gcloud run deploy $REPO_NAME --image gcr.io/$CLOUD_RUN_PROJECT_ID/$REPO_NAME:$GITHUB_SHA \
           --project $CLOUD_RUN_PROJECT_ID \
           --region $CLOUD_RUN_REGION \
           --set-env-vars SSO_TOKEN=$SSO_TOKEN \
