@@ -51,4 +51,4 @@ USER nextjs
 
 EXPOSE ${PORT}
 
-CMD ["yarn", "start"]
+CMD ["node", "server.js"]
