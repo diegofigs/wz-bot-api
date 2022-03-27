@@ -1,8 +1,8 @@
-import { login, Warzone } from 'call-of-duty-api';
-import { Interval } from 'date-fns';
+import { login, Warzone } from "call-of-duty-api";
+import { Interval } from "date-fns";
 
-import { Player } from './interfaces';
-import { CareerResponse, HighlightsResponse } from './types';
+import { Player } from "./interfaces";
+import { CareerResponse, HighlightsResponse } from "./types";
 
 export const loginToCOD = async () => {
   const loggedIn = login(process.env.SSO_TOKEN);
@@ -24,12 +24,13 @@ export const getCareer = async (player: Player): Promise<CareerResponse> => {
   const { data: careerData } = await Warzone.fullData(gamertag, platform);
 
   const stats = careerData.lifetime.mode.br.properties;
-  const {
-    kills, wins, kdRatio, deaths,
-  } = stats;
+  const { kills, wins, kdRatio, deaths } = stats;
 
   return {
-    kills, wins, kdRatio, deaths,
+    kills,
+    wins,
+    kdRatio,
+    deaths,
   };
 };
 
@@ -45,17 +46,10 @@ export const getStats = async (player: Player) => {
     return {};
   }
 
-  try {
-    const { gamertag, platform } = player;
-    const { data: combatData } = await Warzone.combatHistory(
-      gamertag,
-      platform,
-    );
+  const { gamertag, platform } = player;
+  const { data: combatData } = await Warzone.combatHistory(gamertag, platform);
 
-    return combatData;
-  } catch (error) {
-    return {};
-  }
+  return combatData;
 };
 
 /**
@@ -66,38 +60,37 @@ export const getStats = async (player: Player) => {
  */
 export const getHighlights = async (
   player: Player,
-  interval: Interval,
+  interval: Interval
 ): Promise<HighlightsResponse> => {
   const loggedIn = await loginToCOD();
   if (!loggedIn) {
     return {};
   }
 
-  try {
-    const { gamertag, platform } = player;
-    const { data: combatData } = await Warzone.combatHistoryWithDate(
-      gamertag,
-      interval.start as number,
-      interval.end as number,
-      platform,
-    );
+  const { gamertag, platform } = player;
+  const { data: combatData } = await Warzone.combatHistoryWithDate(
+    gamertag,
+    interval.start as number,
+    interval.end as number,
+    platform
+  );
 
-    const response = combatData.matches.reduce((acc, match) => {
-      const { mostKills, highestKD } = acc;
-      const { kills, kdRatio } = match.playerStats;
+  const response = combatData.matches.reduce((acc, match) => {
+    const { mostKills, highestKD } = acc;
+    const { kills, kdRatio } = match.playerStats;
 
-      return {
-        mostKills: !mostKills || mostKills < kills ? kills : mostKills,
-        highestKD: !highestKD || highestKD < kdRatio ? kdRatio : highestKD,
-      };
-    }, {}) as HighlightsResponse;
-    return response;
-  } catch (error) {
-    return {};
-  }
+    return {
+      mostKills: !mostKills || mostKills < kills ? kills : mostKills,
+      highestKD: !highestKD || highestKD < kdRatio ? kdRatio : highestKD,
+    };
+  }, {}) as HighlightsResponse;
+  return response;
 };
 
-export const getRebirth = async (player: Player) => {
+export const getRebirth = async (
+  player: Player,
+  _interval: Interval
+): Promise<HighlightsResponse> => {
   const loggedIn = await loginToCOD();
   if (!loggedIn) {
     return {};
@@ -106,7 +99,9 @@ export const getRebirth = async (player: Player) => {
   const { gamertag, platform } = player;
   const { data: combatData } = await Warzone.combatHistory(gamertag, platform);
 
-  const rebirthMatches = combatData.matches.filter(match => match.mode.includes("br_rebirth"));
+  const rebirthMatches = combatData.matches.filter((match) =>
+    match.mode.includes("br_rebirth")
+  );
   const response = rebirthMatches.reduce((acc, match) => {
     const { mostKills, highestKD } = acc;
     const { kills, kdRatio } = match.playerStats;

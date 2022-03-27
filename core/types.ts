@@ -1,3 +1,9 @@
+export enum Formats {
+  json = "json",
+  text = "text",
+  human = "human",
+};
+
 export type CareerResponse = {
   kills?: number;
   wins?: number;
