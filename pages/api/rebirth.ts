@@ -1,9 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { platforms } from "call-of-duty-api";
+import { startOfDay } from "date-fns";
 
 import { getRebirth } from "core";
 import { HighlightsResponse, Formats } from "core/types";
-import { startOfDay } from "date-fns";
 
 const allowedMethods = ["GET", "POST"];
 const getRebirthHandler = async (req: NextApiRequest, res: NextApiResponse<HighlightsResponse | string>) => {
