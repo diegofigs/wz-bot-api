@@ -103,22 +103,18 @@ export const getRebirth = async (player: Player) => {
     return {};
   }
 
-  try {
-    const { gamertag, platform } = player;
-    const { data: combatData } = await Warzone.combatHistory(gamertag, platform);
+  const { gamertag, platform } = player;
+  const { data: combatData } = await Warzone.combatHistory(gamertag, platform);
 
-    const rebirthMatches = combatData.matches.filter(match => match.mode.includes("br_rebirth"));
-    const response = rebirthMatches.reduce((acc, match) => {
-      const { mostKills, highestKD } = acc;
-      const { kills, kdRatio } = match.playerStats;
+  const rebirthMatches = combatData.matches.filter(match => match.mode.includes("br_rebirth"));
+  const response = rebirthMatches.reduce((acc, match) => {
+    const { mostKills, highestKD } = acc;
+    const { kills, kdRatio } = match.playerStats;
 
-      return {
-        mostKills: !mostKills || mostKills < kills ? kills : mostKills,
-        highestKD: !highestKD || highestKD < kdRatio ? kdRatio : highestKD,
-      };
-    }, {}) as HighlightsResponse;
-    return response;
-  } catch (error) {
-    return {};
-  }
+    return {
+      mostKills: !mostKills || mostKills < kills ? kills : mostKills,
+      highestKD: !highestKD || highestKD < kdRatio ? kdRatio : highestKD,
+    };
+  }, {}) as HighlightsResponse;
+  return response;
 };
