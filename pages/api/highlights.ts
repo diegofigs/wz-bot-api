@@ -1,17 +1,46 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { startOfDay } from 'date-fns';
+import { platforms } from 'call-of-duty-api';
 
 import { getHighlights } from 'core';
-import { HighlightsResponse } from 'core/types';
+import { HighlightsResponse, Formats } from 'core/types';
 
-const getHighlightsHandler = async (req: NextApiRequest, res: NextApiResponse<HighlightsResponse>) => {
-  const { gamertag, platform } = req.body;
+const allowedMethods = ["GET", "POST"];
+const getHighlightsHandler = async (req: NextApiRequest, res: NextApiResponse<HighlightsResponse | string>) => {
+  const { method } = req;
+  if (allowedMethods.includes(method)) {
+    const { body, query } = req;
+    const gamertag = (body.gamertag || query.gamertag) as string;
+    const platform = (body.platform || query.platform) as platforms;
+    if (!gamertag || !platform) {
+      res.status(400).end('gamertag and platform are required arguments');
+      return;
+    }
 
-  const now = new Date();
-  const interval = { start: startOfDay(now).getSeconds(), end: now.getSeconds() };
-  const highlights = await getHighlights({ gamertag, platform }, interval);
+    const responseFormat = query.format as string;
+    const format = responseFormat || Formats.json;
+    if (!Object.values(Formats).includes(format as Formats)) {
+      res.status(400).end(`"${format}" is not a valid format, use <${Formats.json}|${Formats.text}|${Formats.human}> instead`);
+      return;
+    }
 
-  res.send(highlights);
+    try {
+      const now = new Date();
+      const interval = { start: startOfDay(now).getSeconds(), end: now.getSeconds() };
+      const highlights = await getHighlights({ gamertag, platform }, interval);
+      if (format === Formats.json) {
+        res.send(highlights);
+      }
+      if (format === Formats.text || format === Formats.human) {
+        res.send(`Most Kills of the day: ${highlights.mostKills}, Highest KD of the day: ${highlights.highestKD}`);
+      }
+    } catch (error) {
+      res.status(500).end(`Error getting BR highlights for ${gamertag}`);
+    }
+  } else {
+    res.setHeader("Allow", allowedMethods);
+    res.status(405).end(`Method ${method} Not Allowed`);
+  }
 };
 
 export default getHighlightsHandler;
