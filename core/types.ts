@@ -13,5 +13,11 @@ export type CareerResponse = {
 
 export type HighlightsResponse = {
   mostKills?: number,
-  highestKD?: number
+  highestKD?: number,
+  gamertag?: string
 };
+
+export type LeaderboardResponse = {
+  byKills: HighlightsResponse[],
+  byKDR: HighlightsResponse[]
+}

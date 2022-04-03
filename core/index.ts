@@ -2,7 +2,7 @@ import { login, Warzone } from "call-of-duty-api";
 import { Interval } from "date-fns";
 
 import { Player } from "./interfaces";
-import { CareerResponse, HighlightsResponse } from "./types";
+import { CareerResponse, HighlightsResponse, LeaderboardResponse } from "./types";
 
 export const loginToCOD = async () => {
   const loggedIn = login(process.env.SSO_TOKEN);
@@ -89,7 +89,7 @@ export const getHighlights = async (
 
 export const getRebirth = async (
   player: Player,
-  _interval: Interval
+  _interval?: Interval
 ): Promise<HighlightsResponse> => {
   const loggedIn = await loginToCOD();
   if (!loggedIn) {
@@ -112,4 +112,30 @@ export const getRebirth = async (
     };
   }, {}) as HighlightsResponse;
   return response;
+};
+
+export const getRebirthBulk = async (players: Player[], _opts: any = {}) => {
+  const loggedIn = await loginToCOD();
+  if (!loggedIn) {
+    return {} as LeaderboardResponse;
+  }
+
+  const playerStats = await Promise.all(
+    players.map(async (player) => {
+      try {
+        const rebirthHighlights = await getRebirth(player);
+        return { gamertag: player.gamertag, ...rebirthHighlights };
+      } catch (error) {
+        return { gamertag: player.gamertag };
+      }
+    })
+  );
+
+  const playerEntries = playerStats.filter(
+    ({ mostKills, highestKD }) => mostKills || highestKD
+  );
+  const byKills = [...playerEntries].sort((a, b) => b.mostKills - a.mostKills);
+  const byKDR = [...playerEntries].sort((a, b) => b.highestKD - a.highestKD);
+
+  return { byKills, byKDR };
 };
