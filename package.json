@@ -21,11 +21,20 @@
   },
   "devDependencies": {
     "@types/react-dom": "^17.0.13",
+    "cz-conventional-changelog": "3.3.0",
     "eslint": "^7.2.0",
     "eslint-config-next": "12.1.0",
     "semantic-release": "^19.0.2"
   },
   "release": {
-    "branches": ["main", "next"]
+    "branches": [
+      "main",
+      "next"
+    ]
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }
