@@ -35,3 +35,5 @@ yarn-error.log*
 
 # experimental
 tsconfig.tsbuildinfo
+
+.vscode
