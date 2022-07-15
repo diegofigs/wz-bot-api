@@ -1,10 +1,16 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { platforms } from "call-of-duty-api";
 import { startOfDay } from "date-fns";
+import { z } from "zod";
 
 import { getRebirth, getRebirthBulk } from "core";
-import { HighlightsResponse, Formats, LeaderboardResponse } from "core/types";
-import { Player } from "core/interfaces";
+import {
+  HighlightsResponse,
+  LeaderboardResponse,
+  Formats,
+  Player,
+} from "core/types";
+
+const PlayerCollection = z.object({ players: z.array(Player) });
 
 const allowedMethods = ["GET", "POST"];
 const getRebirthHandler = async (
@@ -12,43 +18,28 @@ const getRebirthHandler = async (
   res: NextApiResponse<LeaderboardResponse | HighlightsResponse | string>
 ) => {
   const { method } = req;
-  if (allowedMethods.includes(method)) {
-    const { body, query } = req;
-    const gamertag = (body.gamertag || query.gamertag) as string;
-    const platform = (body.platform || query.platform) as platforms;
-    const players = body.players;
+  if (method && !allowedMethods.includes(method)) {
+    return res
+      .setHeader("Allow", allowedMethods)
+      .status(405)
+      .end(`Method ${method} Not Allowed`);
+  }
 
-    if (!players && (!gamertag || !platform)) {
-      res.status(400).end("gamertag and platform are required arguments");
-      return;
-    }
-
-    if (players) {
-      const isValidFormat = players.every((p: Player) => p.gamertag && p.platform);
-      if (isValidFormat) {
-        const stats = await getRebirthBulk(players);
-        res.send(stats);
-      } else {
-        res
-          .status(400)
-          .end(
-            `"players" is invalid, ensure all entries include a gamertag and platform`
-          );
+  const { body, query } = req;
+  const isPost = method === "POST";
+  try {
+    const parsedPlayers = PlayerCollection.safeParse(isPost ? body : query);
+    if (parsedPlayers.success) {
+      try {
+        const stats = await getRebirthBulk(parsedPlayers.data.players);
+        return res.send(stats);
+      } catch (error) {
+        return res.status(500).end(`Error getting Rebirth highlights for players`);
       }
-      return;
     }
 
-    const responseFormat = query.format as string;
-    const format = responseFormat || Formats.json;
-    if (!Object.values(Formats).includes(format as Formats)) {
-      res
-        .status(400)
-        .end(
-          `"${format}" is not a valid format, use <${Formats.json}|${Formats.text}|${Formats.human}> instead`
-        );
-      return;
-    }
-
+    const parsedPlayer = Player.parse(isPost ? body : query);
+    const { gamertag, platform } = parsedPlayer;
     try {
       const now = new Date();
       const interval = {
@@ -56,20 +47,24 @@ const getRebirthHandler = async (
         end: now.getUTCSeconds(),
       };
       const stats = await getRebirth({ gamertag, platform }, interval);
-      if (format === Formats.json) {
-        res.send(stats);
+
+      const parsedFormat = Formats.safeParse(query.format);
+      const format = parsedFormat.success
+        ? parsedFormat.data
+        : Formats.Enum.json;
+      if (format === Formats.Enum.json) {
+        return res.send(stats);
       }
-      if (format === Formats.text || format === Formats.human) {
-        res.send(
+      if (format === Formats.Enum.text || format === Formats.Enum.human) {
+        return res.send(
           `Most Kills of the day: ${stats.mostKills}, Highest KD of the day: ${stats.highestKD}`
         );
       }
     } catch (error) {
-      res.status(500).end(`Error getting Rebirth highlights for ${gamertag}`);
+      return res.status(500).end(`Error getting Rebirth highlights for ${gamertag}`);
     }
-  } else {
-    res.setHeader("Allow", allowedMethods);
-    res.status(405).end(`Method ${method} Not Allowed`);
+  } catch (error) {
+    return res.status(400).end("gamertag and platform are required arguments");
   }
 };
 

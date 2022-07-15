@@ -1,45 +1,51 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
-import { startOfDay } from 'date-fns';
-import { platforms } from 'call-of-duty-api';
+import type { NextApiRequest, NextApiResponse } from "next";
+import { startOfDay } from "date-fns";
 
-import { getHighlights } from 'core';
-import { HighlightsResponse, Formats } from 'core/types';
+import { getHighlights } from "core";
+import { HighlightsResponse, Formats, Player } from "core/types";
 
 const allowedMethods = ["GET", "POST"];
-const getHighlightsHandler = async (req: NextApiRequest, res: NextApiResponse<HighlightsResponse | string>) => {
+const getHighlightsHandler = async (
+  req: NextApiRequest,
+  res: NextApiResponse<HighlightsResponse | string>
+) => {
   const { method } = req;
-  if (allowedMethods.includes(method)) {
-    const { body, query } = req;
-    const gamertag = (body.gamertag || query.gamertag) as string;
-    const platform = (body.platform || query.platform) as platforms;
-    if (!gamertag || !platform) {
-      res.status(400).end('gamertag and platform are required arguments');
-      return;
-    }
+  if (method && !allowedMethods.includes(method)) {
+    return res
+      .setHeader("Allow", allowedMethods)
+      .status(405)
+      .end(`Method ${method} Not Allowed`);
+  }
 
-    const responseFormat = query.format as string;
-    const format = responseFormat || Formats.json;
-    if (!Object.values(Formats).includes(format as Formats)) {
-      res.status(400).end(`"${format}" is not a valid format, use <${Formats.json}|${Formats.text}|${Formats.human}> instead`);
-      return;
-    }
-
+  const { body, query } = req;
+  try {
+    const player = Player.parse(method === "POST" ? body : query);
+    const { gamertag, platform } = player;
     try {
       const now = new Date();
-      const interval = { start: startOfDay(now).getSeconds(), end: now.getSeconds() };
+      const interval = {
+        start: startOfDay(now).getSeconds(),
+        end: now.getSeconds(),
+      };
       const highlights = await getHighlights({ gamertag, platform }, interval);
-      if (format === Formats.json) {
-        res.send(highlights);
+
+      const parsedFormat = Formats.safeParse(query.format);
+      const format = parsedFormat.success
+        ? parsedFormat.data
+        : Formats.Enum.json;
+      if (format === Formats.Enum.json) {
+        return res.send(highlights);
       }
-      if (format === Formats.text || format === Formats.human) {
-        res.send(`Most Kills of the day: ${highlights.mostKills}, Highest KD of the day: ${highlights.highestKD}`);
+      if (format === Formats.Enum.text || format === Formats.Enum.human) {
+        return res.send(
+          `Most Kills of the day: ${highlights.mostKills}, Highest KD of the day: ${highlights.highestKD}`
+        );
       }
     } catch (error) {
-      res.status(500).end(`Error getting BR highlights for ${gamertag}`);
+      return res.status(500).end(`Error getting BR highlights for ${gamertag}`);
     }
-  } else {
-    res.setHeader("Allow", allowedMethods);
-    res.status(405).end(`Method ${method} Not Allowed`);
+  } catch (error) {
+    return res.status(400).end("gamertag and platform are required arguments");
   }
 };
 
