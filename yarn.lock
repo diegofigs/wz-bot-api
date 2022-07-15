@@ -1123,13 +1123,13 @@ call-bind@^1.0.0, call-bind@^1.0.2:
     function-bind "^1.1.1"
     get-intrinsic "^1.0.2"
 
-call-of-duty-api@^3.1.1:
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/call-of-duty-api/-/call-of-duty-api-3.1.1.tgz#c364614b5be26b5f058a4670829d5499e6cc6c11"
-  integrity sha512-rHDbtXX3yjxUY095jZYDisFLkylJIUgqk0MLZ5OcInMef/w9yb3N20QnGy50iW0VNAPmXqsEElXUJk6qpbkI5Q==
+call-of-duty-api@^3.2.1:
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/call-of-duty-api/-/call-of-duty-api-3.2.1.tgz#85305f9ebe4fc5a400c64a4c8f7c1786be30ee51"
+  integrity sha512-wAuUjOdfKlYsMrsVJwYwZgbvf1baT6bCH5RFq16Ygt8WkzOk6wCUa5Hbjcjc9shFGw2Z4K40tBV1Uat1e7DEFQ==
   dependencies:
-    tslib "^2.3.1"
-    undici "^4.14.1"
+    tslib "^2.4.0"
+    undici "^5.5.1"
 
 callsites@^3.0.0:
   version "3.1.0"
@@ -4952,10 +4952,10 @@ tslib@^1.8.1, tslib@^1.9.0:
   resolved "https://registry.yarnpkg.com/tslib/-/tslib-1.14.1.tgz#cf2d38bdc34a134bcaf1091c41f6619e2f672d00"
   integrity sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==
 
-tslib@^2.3.1:
-  version "2.3.1"
-  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.3.1.tgz#e8a335add5ceae51aa261d32a490158ef042ef01"
-  integrity sha512-77EbyPPpMz+FRFRuAFlWMtmgUWGe9UOG2Z25NqCwiIjRhOf5iKGuzSe5P2w1laq+FkRy4p+PCuVkJSGkzTEKVw==
+tslib@^2.4.0:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/tslib/-/tslib-2.4.0.tgz#7cecaa7f073ce680a05847aa77be941098f36dc3"
+  integrity sha512-d6xOpEDfsi2CZVlPQzGeux8XMwLT9hssAsaPYExaQMuYskwb+x1x7J371tWlbBdWHroy99KnVB6qIkUbs5X3UQ==
 
 tsutils@^3.21.0:
   version "3.21.0"
@@ -5026,10 +5026,10 @@ unbox-primitive@^1.0.1:
     has-symbols "^1.0.2"
     which-boxed-primitive "^1.0.2"
 
-undici@^4.14.1:
-  version "4.16.0"
-  resolved "https://registry.yarnpkg.com/undici/-/undici-4.16.0.tgz#469bb87b3b918818d3d7843d91a1d08da357d5ff"
-  integrity sha512-tkZSECUYi+/T1i4u+4+lwZmQgLXd4BLGlrc7KZPcLIW7Jpq99+Xpc30ONv7nS6F5UNOxp/HBZSSL9MafUrvJbw==
+undici@^5.5.1:
+  version "5.7.0"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-5.7.0.tgz#979f89229c01505573cb274d0e11ea8d82b4004f"
+  integrity sha512-ORgxwDkiPS+gK2VxE7iyVeR7JliVn5DqhZ4LgQqYLBXsuK+lwOEmnJ66dhvlpLM0tC3fC7eYF1Bti2frbw2eAA==
 
 unique-filename@^1.1.1:
   version "1.1.1"
