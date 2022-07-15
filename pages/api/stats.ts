@@ -1,5 +1,4 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { platforms } from 'call-of-duty-api';
 
 import { getStats } from 'core';
 import { Player } from 'core/types';
