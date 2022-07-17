@@ -28,8 +28,8 @@ jobs:
         node-version-file: './functions/.nvmrc'
         cache: 'npm'
     - name: install
-      working-dir: ./functions
+      working-directory: ./functions
       run: npm ci
     - name: test
-      working-dir: ./functions
+      working-directory: ./functions
       run: npm test
