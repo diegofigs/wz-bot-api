@@ -1,14 +1,15 @@
-const assert = require("assert");
-const sinon = require("sinon");
-const Discord = require("discord.js");
-const api = require("./api");
+
+import assert from "assert";
+import sinon from "sinon";
+import Discord from "discord.js";
+import * as api from "./api";
 
 const stubGetRebirthBulk = sinon.stub(api, "getRebirthBulk");
 const stubWebhookClient = sinon.createStubInstance(Discord.WebhookClient);
 sinon.stub(Discord, "WebhookClient").returns(stubWebhookClient);
 sinon.mock(Discord.MessageEmbed);
 
-const { sendLeaderboard } = require("./index");
+import { sendLeaderboard } from "./index";
 
 const MESSAGE = "message";
 
@@ -17,8 +18,8 @@ describe("sendLeaderboard", () => {
   const jsonBuffer = Buffer.from(jsonObject).toString("base64");
   const pubsubMessage = { data: jsonBuffer, publishTime: new Date() };
 
-  let stubLog;
-  let stubError;
+  let stubLog: sinon.SinonStub<[message?: any, ...optionalParams: any[]], void>;
+  let stubError: sinon.SinonStub<[message?: any, ...optionalParams: any[]], void>;
   const stubConsole = () => {
     stubLog = sinon.stub(console, "log");
     stubError = sinon.stub(console, "error");
