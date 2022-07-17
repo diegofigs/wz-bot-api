@@ -1,0 +1,42 @@
+name: Deploy to Google Cloud Functions
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  CLOUD_RUN_REGION: us-east1
+  DISCORD_LEADERBOARD_WEBHOOK_URL: ${{ secrets.DISCORD_LEADERBOARD_WEBHOOK_URL }}
+
+jobs:
+  deploy_sendLeaderboard:
+    name: Deploy sendLeaderboard
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      packages: 'write'
+      id-token: 'write'
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    # This step is where our service account will be authenticated
+    - id: 'auth'
+      uses: 'google-github-actions/auth@v0'
+      with:
+        credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}'
+    
+    # Setup gcloud CLI
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v0
+
+    - name: Deploy sendLeaderboard
+      working-directory: ./functions
+      run: |-
+        gcloud functions deploy sendLeaderboard \
+          --region $CLOUD_RUN_REGION \
+          --set-env-vars DISCORD_LEADERBOARD_WEBHOOK_URL=$DISCORD_LEADERBOARD_WEBHOOK_URL \
+          --trigger-topic=warzone-bot.leaderboard \
+          --runtime=nodejs16
