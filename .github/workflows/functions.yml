@@ -36,7 +36,7 @@ jobs:
     - name: Deploy sendLeaderboard
       working-directory: ./functions
       run: |-
-        gcloud run deploy functions -- sendLeaderboard \
+        gcloud run deploy functions sendLeaderboard \
           --region $CLOUD_RUN_REGION \
           --set-env-vars DISCORD_LEADERBOARD_WEBHOOK_URL=$DISCORD_LEADERBOARD_WEBHOOK_URL \
           --trigger-topic=warzone-bot.leaderboard \
