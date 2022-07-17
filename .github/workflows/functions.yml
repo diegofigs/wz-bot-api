@@ -7,7 +7,6 @@ on:
       - ci-*
 
 env:
-  CLOUD_RUN_PROJECT_ID: ${{ secrets.CLOUD_RUN_PROJECT_NAME }}
   CLOUD_RUN_REGION: us-east1
   DISCORD_LEADERBOARD_WEBHOOK_URL: ${{ secrets.DISCORD_LEADERBOARD_WEBHOOK_URL }}
 
@@ -29,14 +28,16 @@ jobs:
       uses: 'google-github-actions/auth@v0'
       with:
         credentials_json: '${{ secrets.GOOGLE_CREDENTIALS }}'
+    
+    # Setup gcloud CLI
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v0
 
-    # Configure Docker to use the gcloud command-line tool as a credential
-    # helper for authentication
-    - uses: 'google-github-actions/deploy-cloud-functions@v0'
-      with:
-        name: 'sendLeaderboard'
-        runtime: 'nodejs16'
-        project_id: $CLOUD_RUN_PROJECT_ID
-        region: $CLOUD_RUN_REGION
-        env_vars: DISCORD_LEADERBOARD_WEBHOOK_URL=$DISCORD_LEADERBOARD_WEBHOOK_URL
-        source_dir: ./functions
+    - name: Deploy sendLeaderboard
+      working-directory: ./functions
+      run: |-
+        gcloud run deploy functions -- sendLeaderboard \
+          --region $CLOUD_RUN_REGION \
+          --set-env-vars DISCORD_LEADERBOARD_WEBHOOK_URL=$DISCORD_LEADERBOARD_WEBHOOK_URL \
+          --trigger-topic=warzone-bot.leaderboard \
+          --runtime=nodejs16
