@@ -36,7 +36,7 @@ jobs:
       with:
         name: 'sendLeaderboard'
         runtime: 'nodejs16'
-        project: $CLOUD_RUN_PROJECT_ID
+        project_id: $CLOUD_RUN_PROJECT_ID
         region: $CLOUD_RUN_REGION
         env_vars: DISCORD_LEADERBOARD_WEBHOOK_URL=$DISCORD_LEADERBOARD_WEBHOOK_URL
         source_dir: ./functions
