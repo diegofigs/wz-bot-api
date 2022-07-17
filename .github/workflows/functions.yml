@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - ci-*
 
 env:
   CLOUD_RUN_REGION: us-east1
@@ -12,7 +11,7 @@ env:
 
 jobs:
   deploy_sendLeaderboard:
-    name: Deploy
+    name: Deploy sendLeaderboard
     runs-on: ubuntu-latest
     permissions:
       contents: 'read'
