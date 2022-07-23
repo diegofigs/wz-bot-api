@@ -34,7 +34,9 @@ const getRebirthHandler = async (
         const stats = await getRebirthBulk(parsedPlayers.data.players);
         return res.send(stats);
       } catch (error) {
-        return res.status(500).end(`Error getting Rebirth highlights for players`);
+        return res
+          .status(500)
+          .end(`Error getting Rebirth highlights for players`);
       }
     }
 
@@ -61,7 +63,9 @@ const getRebirthHandler = async (
         );
       }
     } catch (error) {
-      return res.status(500).end(`Error getting Rebirth highlights for ${gamertag}`);
+      return res
+        .status(500)
+        .end(`Error getting Rebirth highlights for ${gamertag}`);
     }
   } catch (error) {
     return res.status(400).end("gamertag and platform are required arguments");

@@ -3,11 +3,11 @@ import { z } from "zod";
 
 export const Player = z.object({
   gamertag: z.string(),
-  platform: z.nativeEnum(platforms)
+  platform: z.nativeEnum(platforms),
 });
-export type Player = z.infer<typeof Player>
+export type Player = z.infer<typeof Player>;
 
-export const Formats = z.enum(["json", "text", "human"])
+export const Formats = z.enum(["json", "text", "human"]);
 
 export type CareerResponse = {
   kills: number;
@@ -17,12 +17,12 @@ export type CareerResponse = {
 };
 
 export type HighlightsResponse = {
-  mostKills: number,
-  highestKD: number,
-  gamertag?: string
+  mostKills: number;
+  highestKD: number;
+  gamertag?: string;
 };
 
 export type LeaderboardResponse = {
-  byKills: HighlightsResponse[],
-  byKDR: HighlightsResponse[]
-}
+  byKills: HighlightsResponse[];
+  byKDR: HighlightsResponse[];
+};
