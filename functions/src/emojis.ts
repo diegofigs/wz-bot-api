@@ -51,4 +51,4 @@ export default {
   red_heart: "❤",
   bread: "🥖",
   donut: "🍩",
-};
+} as Record<string | number | symbol, string>;

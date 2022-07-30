@@ -16,12 +16,10 @@ export default [
     platform: "acti",
   },
   {
-    playerName: "FernanJ",
     gamertag: "FernanJ",
     platform: "xbl",
   },
   {
-    playerName: "Jishin",
     gamertag: "Jishin#11829",
     platform: "battle",
   },
@@ -30,12 +28,10 @@ export default [
     platform: "acti",
   },
   {
-    playerName: "PG CoConuT",
     gamertag: "wizkolifa#1841",
     platform: "battle",
   },
   {
-    playerName: "JoseManiii",
     gamertag: "tempestatis#1644",
     platform: "battle",
   },
@@ -43,4 +39,4 @@ export default [
     gamertag: "RipNDip#11945",
     platform: "battle",
   },
-];
+] as Array<{ gamertag: string; platform: string }>;
