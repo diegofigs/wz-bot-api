@@ -76,15 +76,18 @@ export const getHighlights = async (
     platform
   );
 
-  const response = combatData.matches.reduce((acc: any, match: any) => {
-    const { mostKills, highestKD } = acc;
-    const { kills, kdRatio } = match.playerStats;
+  const response = combatData.matches.reduce(
+    (acc: any, match: any) => {
+      const { mostKills, highestKD } = acc;
+      const { kills, kdRatio } = match.playerStats;
 
-    return {
-      mostKills: !mostKills || mostKills < kills ? kills : mostKills,
-      highestKD: !highestKD || highestKD < kdRatio ? kdRatio : highestKD,
-    };
-  }, { mostKills: 0, highestKD: 0 });
+      return {
+        mostKills: !mostKills || mostKills < kills ? kills : mostKills,
+        highestKD: !highestKD || highestKD < kdRatio ? kdRatio : highestKD,
+      };
+    },
+    { mostKills: 0, highestKD: 0 }
+  );
   return response;
 };
 
@@ -101,15 +104,18 @@ export const getRebirth = async (
   const rebirthMatches = combatData.matches.filter((match: any) =>
     match.mode.includes("br_rebirth")
   );
-  const response = rebirthMatches.reduce<HighlightsResponse>((acc: any, match: any) => {
-    const { mostKills, highestKD } = acc;
-    const { kills, kdRatio } = match.playerStats;
+  const response = rebirthMatches.reduce<HighlightsResponse>(
+    (acc: any, match: any) => {
+      const { mostKills, highestKD } = acc;
+      const { kills, kdRatio } = match.playerStats;
 
-    return {
-      mostKills: !mostKills || mostKills < kills ? kills : mostKills,
-      highestKD: !highestKD || highestKD < kdRatio ? kdRatio : highestKD,
-    };
-  }, { mostKills: 0, highestKD: 0 });
+      return {
+        mostKills: !mostKills || mostKills < kills ? kills : mostKills,
+        highestKD: !highestKD || highestKD < kdRatio ? kdRatio : highestKD,
+      };
+    },
+    { mostKills: 0, highestKD: 0 }
+  );
   return response;
 };
 
