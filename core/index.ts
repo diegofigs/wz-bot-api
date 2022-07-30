@@ -1,4 +1,4 @@
-import { login, Warzone } from "call-of-duty-api";
+import { login, Warzone } from "@diegofigs/call-of-duty";
 import { Interval } from "date-fns";
 
 import {
@@ -8,9 +8,10 @@ import {
 } from "./types";
 import type { Player } from "./types";
 
-export const loginToCOD = async () => {
-  return process.env.SSO_TOKEN ? login(process.env.SSO_TOKEN) : false;
-};
+let loggedIn: boolean;
+if (process.env.SSO_TOKEN) {
+  loggedIn = login(process.env.SSO_TOKEN);
+}
 
 /**
  * Getter function that fetches important player KPIs
@@ -18,7 +19,6 @@ export const loginToCOD = async () => {
  * @returns
  */
 export const getCareer = async (player: Player): Promise<CareerResponse> => {
-  const loggedIn = await loginToCOD();
   if (!loggedIn) {
     throw new Error("not logged in");
   }
@@ -44,7 +44,6 @@ export const getCareer = async (player: Player): Promise<CareerResponse> => {
  * @returns
  */
 export const getStats = async (player: Player) => {
-  const loggedIn = await loginToCOD();
   if (!loggedIn) {
     throw new Error("not logged in");
   }
@@ -65,7 +64,6 @@ export const getHighlights = async (
   player: Player,
   interval: Interval
 ): Promise<HighlightsResponse> => {
-  const loggedIn = await loginToCOD();
   if (!loggedIn) {
     throw new Error("not logged in");
   }
@@ -78,15 +76,18 @@ export const getHighlights = async (
     platform
   );
 
-  const response = combatData.matches.reduce((acc: any, match: any) => {
-    const { mostKills, highestKD } = acc;
-    const { kills, kdRatio } = match.playerStats;
+  const response = combatData.matches.reduce(
+    (acc: any, match: any) => {
+      const { mostKills, highestKD } = acc;
+      const { kills, kdRatio } = match.playerStats;
 
-    return {
-      mostKills: !mostKills || mostKills < kills ? kills : mostKills,
-      highestKD: !highestKD || highestKD < kdRatio ? kdRatio : highestKD,
-    };
-  }, {}) as HighlightsResponse;
+      return {
+        mostKills: !mostKills || mostKills < kills ? kills : mostKills,
+        highestKD: !highestKD || highestKD < kdRatio ? kdRatio : highestKD,
+      };
+    },
+    { mostKills: 0, highestKD: 0 }
+  );
   return response;
 };
 
@@ -94,7 +95,6 @@ export const getRebirth = async (
   player: Player,
   _interval?: Interval
 ): Promise<HighlightsResponse> => {
-  const loggedIn = await loginToCOD();
   if (!loggedIn) {
     throw new Error("not logged in");
   }
@@ -104,15 +104,18 @@ export const getRebirth = async (
   const rebirthMatches = combatData.matches.filter((match: any) =>
     match.mode.includes("br_rebirth")
   );
-  const response = rebirthMatches.reduce((acc: any, match: any) => {
-    const { mostKills, highestKD } = acc;
-    const { kills, kdRatio } = match.playerStats;
+  const response = rebirthMatches.reduce<HighlightsResponse>(
+    (acc: any, match: any) => {
+      const { mostKills, highestKD } = acc;
+      const { kills, kdRatio } = match.playerStats;
 
-    return {
-      mostKills: !mostKills || mostKills < kills ? kills : mostKills,
-      highestKD: !highestKD || highestKD < kdRatio ? kdRatio : highestKD,
-    };
-  }, {}) as HighlightsResponse;
+      return {
+        mostKills: !mostKills || mostKills < kills ? kills : mostKills,
+        highestKD: !highestKD || highestKD < kdRatio ? kdRatio : highestKD,
+      };
+    },
+    { mostKills: 0, highestKD: 0 }
+  );
   return response;
 };
 
@@ -120,7 +123,6 @@ export const getRebirthBulk = async (
   players: Player[],
   _opts: any = {}
 ): Promise<LeaderboardResponse> => {
-  const loggedIn = await loginToCOD();
   if (!loggedIn) {
     throw new Error("not logged in");
   }
