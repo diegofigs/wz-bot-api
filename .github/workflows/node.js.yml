@@ -27,9 +27,9 @@ jobs:
       with:
         node-version-file: './functions/.nvmrc'
         cache: 'npm'
-    - name: install
+    - run: npm ci
       working-directory: ./functions
-      run: npm ci
-    - name: test
+    - run: npm run lint
       working-directory: ./functions
-      run: npm test
+    - run: npm test
+      working-directory: ./functions
