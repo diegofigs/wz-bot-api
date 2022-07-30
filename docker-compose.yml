@@ -5,7 +5,5 @@ services:
       context: ./
     env_file:
       - .env.local
-    volumes:
-      - .:/app
     ports:
       - "3000:3000"
