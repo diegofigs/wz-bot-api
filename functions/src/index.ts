@@ -1,1 +1,1 @@
-export { default as sendLeaderboard } from "./sendLeaderboard";
+export { sendLeaderboard } from "./sendLeaderboard.js";

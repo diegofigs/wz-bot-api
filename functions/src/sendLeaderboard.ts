@@ -1,13 +1,19 @@
 import { MessageEmbed, WebhookClient } from "discord.js";
 
-import { getRebirthBulk } from "./api";
-import { emojis, thumbnail } from "./config";
+import { getRebirthBulk } from "./api.js";
+import { thumbnail } from "./config.js";
+import emojis from "./emojis.js";
 
-const webhookClient = new WebhookClient({
-  url: process.env.DISCORD_LEADERBOARD_WEBHOOK_URL,
-});
+let webhookClient: WebhookClient;
+if (process.env.DISCORD_LEADERBOARD_WEBHOOK_URL) {
+  webhookClient = new WebhookClient({
+    url: process.env.DISCORD_LEADERBOARD_WEBHOOK_URL,
+  });
+} else {
+  throw new Error("Error instancing webhook client");
+}
 
-const getPositionEmoji = (position) => {
+const getPositionEmoji = (position: number) => {
   switch (position) {
     case 1:
       return emojis.crown;
@@ -18,7 +24,7 @@ const getPositionEmoji = (position) => {
   }
 };
 
-const getNumberEmoji = (position) => emojis[position];
+const getNumberEmoji = (position: number) => emojis[position];
 
 const HIGH_KILL_THRESHOLD = 20;
 const GREAT_KILL_THRESHOLD = 13;
@@ -26,7 +32,7 @@ const GOOD_KILL_THRESHOLD = 10;
 const NICE_KILL_THRESHOLD = 5;
 const CHURRO = 1;
 const DONUT = 0;
-const getKillAccoladeEmoji = (kills) => {
+const getKillAccoladeEmoji = (kills: number) => {
   if (kills >= HIGH_KILL_THRESHOLD) {
     return emojis.bomb;
   }
@@ -51,7 +57,7 @@ const getKillAccoladeEmoji = (kills) => {
 const HIGH_KD_THRESHOLD = 10;
 const GREAT_KD_THRESHOLD = 6;
 const GOOD_KD_THRESHOLD = 3;
-const getKillDeathAccoladeEmoji = (kd) => {
+const getKillDeathAccoladeEmoji = (kd: number) => {
   if (kd >= HIGH_KD_THRESHOLD) {
     return emojis.green_heart;
   }
@@ -71,8 +77,8 @@ const kdTitle = "KD Leaderboard";
 const description = "Based on today's matches";
 const footer = { text: "This information is property of Infinity Ward" };
 
-const sendLeaderboard = async (message) => {
-  console.log(`[${JOB_NAME}] started at ${new Date(message.publishTime)}`);
+export const sendLeaderboard = async () => {
+  console.time(JOB_NAME);
   const { byKills, byKDR } = await getRebirthBulk();
 
   const killsFields = byKills.map(({ gamertag, mostKills }, i) => {
@@ -112,6 +118,6 @@ const sendLeaderboard = async (message) => {
     embeds: [killsLeaderboardEmbed, ratioLeaderboardEmbed],
   });
 
-  console.log(`[${JOB_NAME}] finished at ${new Date()}`);
+  console.timeEnd(JOB_NAME);
+  return;
 };
-export default sendLeaderboard;
