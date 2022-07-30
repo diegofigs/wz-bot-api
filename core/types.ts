@@ -1,4 +1,4 @@
-import { platforms } from "call-of-duty-api";
+import { platforms } from "@diegofigs/call-of-duty";
 import { z } from "zod";
 
 export const Player = z.object({
